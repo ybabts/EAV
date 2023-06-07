@@ -233,8 +233,7 @@ function readConfigFile(filePath: string): Config | Error {
 }
 ```
 
-We can also do the same to jsonData to make it more descriptive, but a more
-detailed way to go about this. I'm sure you noticed with our `Err` helper we can also change our return type to use `Result`, which is just a union type between `Error` and `T`.
+I'm sure you noticed with our `Err` helper we can also change our return type to use `Result`, which is just a union type between `Error` and `T`.
 
 ```ts
 function readConfigFile(filePath: string): Result<Config> {
