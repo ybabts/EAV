@@ -15,24 +15,24 @@ runtime issues and potentially system failures.
 Errors as values encourages developers to handle errors right where they occur.
 By treating errors as returnable values from functions, we can deal with them at
 the same level as the rest of our application logic. The errors as values
-approach acknowledges that errors are just another type of result taht a
+approach acknowledges that errors are just another type of result that a
 function can produce. This approach leads to more explicit, readable, and
 maintainable code.
 
 ## Why should we adopt this paradigm?
 
-Adopting the errors as values approach inheritely leads to a more proactive
+Adopting the errors as values approach inherently leads to a more proactive
 error handling mechanism. The consumer of a function written using errors as
 values is always presented with the reality that the function could potentially
 return an error. This very nature of errors as values encourages, or rather
-necessitates, that the error be handled immedaitely at the point of function
-invocation. The possibility of an error being return cannot be ignored or
-deferred to a later point in the code; it must be addressed right there and
-then. This way, error handling becomes an integral part of the normal control
+necessitates, that the error be handled immediately at the point of function
+invocation. The possibility of an error being returned cannot be ignored or
+deferred; it must be addressed immediately at the point of function invocation.
+This way, error handling becomes an integral part of the normal control
 flow of the application. The real advantage of this is two fold: firstly it
 leads to more robust code as it reduces the likelihood of unhandled errors
 causing unexpected behavior or crashes. Secondly, it fosters a coding discipline
-where programmers are habitually concious and cautious about potential failures
+where programmers are habitually conscious and cautious about potential failures
 and are more dilligent in managing them, leading to higher code quality overall.
 
 ## Don't we have linters and other static analysis tools to do this?
@@ -53,20 +53,7 @@ robust code.
 
 ## Error messaging improvements
 
-Traditional error handling in JavaScript can often provide a singular, generic
-error message that encapsulates the issue at hand. However, with complex
-applications, understanding the root cause of an issue often requires context
-from various levels of your application stack. With the Errors as Values
-approach, error handling becomes far more informative and layered. As an error
-propagates up through the layers of your application, each layer can add its own
-context to the error message. This gives you a layered, multi-level view into
-where and why an error occurred. For instance, instead of just receiving a high
-level error such as `"Could not get git branches"` or reveiving a low level
-error message like `"File 'packed-refs' no found"`, you could receive an error
-message like
-`"Could not get git branches because: Could not read 'refs/heads' directory and: File 'packed-refs' not found"`.
-This approach provides a detailed narrative of the error's journey through your
-application, making it easier to diagnose and resolve issues.
+Traditional error handling in JavaScript often provides a singular, generic error message that encapsulates the issue at hand. However, with complex applications, understanding the root cause of an issue often requires context from various levels of your application stack. The Errors as Values approach facilitates this by enabling layered error messaging. As an error propagates up through the layers of your application, each layer can add its own context to the error message. This provides a detailed narrative of the error's journey through your application, making it easier to diagnose and resolve issues. For instance, instead of just receiving a high-level error such as `"Could not get git branches"` or receiving a low-level error message like `"File 'packed-refs' not found"`, you could receive an error message like `"Could not get git branches because: Could not read 'refs/heads' directory and: File 'packed-refs' not found"`. This layered, multi-level view into where and why an error occurred significantly improves error diagnosis and resolution.
 
 # Examples
 
@@ -95,7 +82,7 @@ proper permissions, or its content could be improperly formatted.
 Here's the function in the traditional error handling fashion.
 
 ```ts
-function readConfigFile(filePath: string): Config | Error {
+function readConfigFile(filePath: string): Config {
   const fileContent = Deno.readTextFileSync(filePath);
   const jsonData = JSON.parse(fileContent);
   return jsonData as Config;
@@ -306,7 +293,7 @@ export function Unwrap<T>(value: Result<T>): T {
 
 ## Fetching User Data
 
-This example shows that with EaV approach, we can easily control the flow of the system. If the cache retrieval fails, we try the primary DB. If that fails too, we try the backup DB. And if all fails, we return an error stating that all methods failed. With each failure, we also capture the specific error message that can give insights on why that particular method failed.
+In this example, we demonstrate how the Errors as Values (EaV) approach can provide greater control over the system's flow. If retrieving the cache fails, we attempt to access the primary DB. If this also fails, we turn to the backup DB. If all attempts fail, we return an error message indicating that all methods have failed. Each failure is also accompanied by a specific error message that can provide insights into why that particular method failed.
 
 ```ts
 type User = {
@@ -350,16 +337,14 @@ function getUserDataFromBackupDB(userId: string): Result<User> {
 }
 ```
 
-As we've seen, using Errors as Values in JavaScript and TypeScript brings numerous advantages to our codebase, such as making error handling more explicit, improving the readability of the code, enhancing the debugging process, and promoting better code organization.
+As shown, applying the Errors as Values paradigm to JavaScript and TypeScript can provide several advantages to our codebase. It makes error handling more explicit, improves code readability, enhances the debugging process, and promotes better code organization.
 
-While Errors as Values requires a different mindset and might seem a bit unconventional at first, the benefits it offers make it a worthy addition to your coding practices. Like any tool or approach, it's not a one-size-fits-all solution but rather another technique in your toolbelt that can be extremely powerful in certain situations.
+While the Errors as Values approach might seem unconventional and requires a shift in mindset, the benefits it provides make it a valuable addition to your coding toolkit. It's not about replacing every traditional try/catch with Errors as Values but about using the right tool for the job. Sometimes, a try/catch might be exactly what you need. Other times, Errors as Values might be a more appropriate choice.
 
-Remember that it's not about replacing every traditional try/catch with Errors as Values, but rather about using the right tool for the job. Sometimes, a try/catch is exactly what you need. At other times, Errors as Values might be a more appropriate choice.
-
-We hope you found this guide useful and that it contributes to the continual improvement of your codebase. Keep coding, and remember: explicit error handling makes your application more reliable and easier to maintain. Happy coding!
+We hope you find this guide useful, and that it contributes to the continual improvement of your codebase. Keep coding, and remember: explicit error handling makes your application more reliable and easier to maintain. Happy coding!
 
 ---
 
-For more information, queries, or suggestions, please feel free to open an issue or submit a pull request. We'd love to hear from you!
+For more information, queries, or suggestions, please feel free to open an issue or submit a pull request. We're eager to hear from you!
 
 ---
