@@ -19,6 +19,7 @@ export function Err<M extends string>(message: M): CustomError<M> {
   return new Error(message) as CustomError<M>;
 }
 
+// deno-lint-ignore no-explicit-any
 export function Try<T extends (...args: any[]) => any>(
   func: T,
 ): (...args: Parameters<T>) => ReturnType<T> | Error {
