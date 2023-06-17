@@ -1,79 +1,57 @@
 // deno-lint-ignore-file no-explicit-any
 
-export type Result<
-  T,
-  E extends Error | CustomError = CustomError,
-> = T | E;
-
-export type CustomError<
-  C extends ValidCause = ValidCause,
-  M extends string = string,
-> = Error & { message: M; cause: C };
-
-// TOOD(ybabts): figure out how to format added messages better
-export function addMsg<M extends string, E extends Error>(
-  error: E,
-  message: M,
-) {
-  if (error.message.length <= 0) {
-    return Object.assign(error, {
-      message,
-    });
+export class Err<N extends string = "Error"> extends Error {
+  name!: N;
+  constructor(name?: N, message?: string) {
+    super(message);
+    if (name) {
+      this.name = name;
+    }
   }
-  return Object.assign(error, {
-    message: message +
-      `\n${error.message.split("\n").map((line) => "  " + line).join("\n")}`,
-  });
 }
 
-export function Err<C extends ValidCause, M extends string>(
-  cause: C,
-  message?: M,
-): CustomError<C, M> {
-  return new Error(message, {
-    cause,
-  }) as CustomError<C, M>;
+export type Result<T, E extends Error | Err = Err> = T | E;
+
+export type ExtractName<T> = T extends { name: infer N } ? N : never;
+export function isErr<R extends Result<any>, N extends ExtractName<R> & string>(
+  value: R,
+  name?: N,
+): value is Extract<R, Err<N>> & Extract<R, Error> {
+  return value instanceof Error && (name === undefined || value.name === name);
 }
 
-export function Try<
-  T extends (...args: any[]) => any,
-  C extends ValidCause = ValidCause,
+export function Ok<
+  R extends Result<any>,
 >(
-  func: T,
-  cause?: C,
-): (...args: Parameters<T>) => ReturnType<T> | CustomError<C> {
+  value: R,
+): R | null {
+  if (isErr(value)) {
+    return null;
+  }
+  return value;
+}
+
+export function CaptureErr<
+  T extends (...args: any[]) => any,
+  N extends string,
+>(fn: T, name?: N): (...args: Parameters<T>) => ReturnType<T> | Err<N> {
   return (...args: Parameters<T>) => {
     try {
-      return func(...args);
+      const result = fn(...args);
+      if (result instanceof Promise) {
+        return result.catch((e) => {
+          e.name = name ?? e.name;
+          return e as Err<N>;
+        });
+      }
     } catch (error) {
-      error.cause = cause;
+      error.name = name ?? error.name;
       return error;
     }
   };
 }
 
-type ExtractCause<T> = T extends { cause: infer C } ? C : never;
-type ValidCause = string | number;
-
-export function isErr<
-  T extends Result<any>,
-  C extends ExtractCause<T> & ValidCause = ExtractCause<T> & ValidCause,
->(
-  value: T,
-  cause?: C,
-): value is Extract<T, CustomError<C, any>> & Extract<T, Error> {
-  return value instanceof Error &&
-    (cause === undefined || (value as CustomError<C, any>).cause === cause);
-}
-
-export function Ok<T>(value: Result<T>): Exclude<T, Error> | null {
-  if (value instanceof Error) {
-    return null;
-  }
-  return value as Exclude<T, Error>;
-}
-
-export function Unwrap<T>(value: Result<T>): T {
+export function IgnoreErr<T>(value: Result<T>): T {
   if (value instanceof Error) {
     throw value;
   }
