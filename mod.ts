@@ -41,21 +41,19 @@ export function Try<T extends (...args: any[]) => any>(
   };
 }
 
-type Cause<T> = T extends CustomError<any, infer C> ? C : never;
 type ExtractCause<T> = T extends { cause: infer C } ? C : never;
+type ValidCause = string | number;
 
 export function isErr<
   T extends Result<any>,
-  C extends ExtractCause<T> = ExtractCause<T>,
-  B extends Cause<T> = Cause<T>,
+  C extends ExtractCause<T> & ValidCause = ExtractCause<T> & ValidCause,
 >(
   value: T,
   cause?: C,
-): value is Extract<T, CustomError<any, B>> {
+): value is Extract<T, CustomError<C, any>> {
   return value instanceof Error &&
-    (cause === undefined || value.cause === cause);
+    (cause === undefined || (value as CustomError<C, any>).cause === cause);
 }
-
 export function Ok<T>(value: Result<T>): T | null {
   if (value instanceof Error) {
     return null;
