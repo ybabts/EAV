@@ -2,7 +2,7 @@
 
 export type Result<
   T,
-  E extends Error | CustomError = Error | CustomError,
+  E extends Error | CustomError = CustomError,
 > = T | E;
 
 export type CustomError<
