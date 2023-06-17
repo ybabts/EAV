@@ -1,25 +1,34 @@
+// deno-lint-ignore-file no-explicit-any
+
 export type Result<
   T,
   E extends Error = Error,
 > = T | E;
 
-export type CustomError<M extends string> = Error & { message: M };
+export type CustomError<
+  M extends string,
+  C extends string | number,
+> = Error & { message: M; cause: C };
 
 export function addMsg<M extends string, E extends Error>(
   error: E,
   message: M,
-): CustomError<`${M}\n${string}`> {
+) {
   return Object.assign(error, {
     message: message +
       `\n${error.message.split("\n").map((line) => "  " + line).join("\n")}`,
-  }) as CustomError<`${M}\n${string}`>;
+  });
 }
 
-export function Err<M extends string>(message: M): CustomError<M> {
-  return new Error(message) as CustomError<M>;
+export function Err<C extends string | number, M extends string>(
+  cause: C,
+  message?: M,
+): CustomError<M, C> {
+  return new Error(message, {
+    cause,
+  }) as CustomError<M, C>;
 }
 
-// deno-lint-ignore no-explicit-any
 export function Try<T extends (...args: any[]) => any>(
   func: T,
 ): (...args: Parameters<T>) => ReturnType<T> | Error {
@@ -32,9 +41,17 @@ export function Try<T extends (...args: any[]) => any>(
   };
 }
 
-// deno-lint-ignore no-explicit-any
-export function isErr<T extends Error>(value: Result<any>): value is T {
-  return value instanceof Error;
+type ExtractCauseType<T> = T extends { cause: infer C } ? C : never;
+
+export function isErr<
+  T extends Error | any,
+  C extends Exclude<T, any>,
+>(
+  value: T,
+  cause?: ExtractCauseType<T>,
+): value is C {
+  return value instanceof Error &&
+    (cause === undefined || value.cause === cause);
 }
 
 export function Ok<T>(value: Result<T>): T | null {
