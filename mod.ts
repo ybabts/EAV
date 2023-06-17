@@ -66,11 +66,11 @@ export function isErr<
     (cause === undefined || (value as CustomError<C, any>).cause === cause);
 }
 
-export function Ok<T>(value: Result<T>): T | null {
+export function Ok<T>(value: Result<T>): Exclude<T, Error> | null {
   if (value instanceof Error) {
     return null;
   }
-  return value;
+  return value as Exclude<T, Error>;
 }
 
 export function Unwrap<T>(value: Result<T>): T {
