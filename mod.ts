@@ -6,8 +6,8 @@ export type Result<
 > = T | E;
 
 export type CustomError<
-  M extends string,
-  C extends string | number,
+  C extends string | number = string | number,
+  M extends string = string,
 > = Error & { message: M; cause: C };
 
 export function addMsg<M extends string, E extends Error>(
@@ -23,10 +23,10 @@ export function addMsg<M extends string, E extends Error>(
 export function Err<C extends string | number, M extends string>(
   cause: C,
   message?: M,
-): CustomError<M, C> {
+): CustomError<C, M> {
   return new Error(message, {
     cause,
-  }) as CustomError<M, C>;
+  }) as CustomError<C, M>;
 }
 
 export function Try<T extends (...args: any[]) => any>(
@@ -41,15 +41,17 @@ export function Try<T extends (...args: any[]) => any>(
   };
 }
 
-type ExtractCauseType<T> = T extends { cause: infer C } ? C : never;
+type Cause<T> = T extends CustomError<any, infer C> ? C : never;
+type ExtractCause<T> = T extends { cause: infer C } ? C : never;
 
 export function isErr<
-  T extends Error | any,
-  C extends Exclude<T, any>,
+  T extends Result<any>,
+  C extends ExtractCause<T> = ExtractCause<T>,
+  B extends Cause<T> = Cause<T>,
 >(
   value: T,
-  cause?: ExtractCauseType<T>,
-): value is C {
+  cause?: C,
+): value is Extract<T, CustomError<any, B>> {
   return value instanceof Error &&
     (cause === undefined || value.cause === cause);
 }
