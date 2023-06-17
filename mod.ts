@@ -2,7 +2,7 @@
 
 export type Result<
   T,
-  E extends Error = Error,
+  E extends Error | CustomError = Error | CustomError,
 > = T | E;
 
 export type CustomError<
@@ -10,10 +10,16 @@ export type CustomError<
   M extends string = string,
 > = Error & { message: M; cause: C };
 
+// TOOD(ybabts): figure out how to format added messages better
 export function addMsg<M extends string, E extends Error>(
   error: E,
   message: M,
 ) {
+  if (error.message.length <= 0) {
+    return Object.assign(error, {
+      message,
+    });
+  }
   return Object.assign(error, {
     message: message +
       `\n${error.message.split("\n").map((line) => "  " + line).join("\n")}`,
