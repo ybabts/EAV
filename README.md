@@ -28,12 +28,12 @@ return an error. This very nature of errors as values encourages, or rather
 necessitates, that the error be handled immediately at the point of function
 invocation. The possibility of an error being returned cannot be ignored or
 deferred; it must be addressed immediately at the point of function invocation.
-This way, error handling becomes an integral part of the normal control
-flow of the application. The real advantage of this is two fold: firstly it
-leads to more robust code as it reduces the likelihood of unhandled errors
-causing unexpected behavior or crashes. Secondly, it fosters a coding discipline
-where programmers are habitually conscious and cautious about potential failures
-and are more dilligent in managing them, leading to higher code quality overall.
+This way, error handling becomes an integral part of the normal control flow of
+the application. The real advantage of this is two fold: firstly it leads to
+more robust code as it reduces the likelihood of unhandled errors causing
+unexpected behavior or crashes. Secondly, it fosters a coding discipline where
+programmers are habitually conscious and cautious about potential failures and
+are more dilligent in managing them, leading to higher code quality overall.
 
 ## Don't we have linters and other static analysis tools to do this?
 
@@ -53,7 +53,20 @@ robust code.
 
 ## Error messaging improvements
 
-Traditional error handling in JavaScript often provides a singular, generic error message that encapsulates the issue at hand. However, with complex applications, understanding the root cause of an issue often requires context from various levels of your application stack. The Errors as Values approach facilitates this by enabling layered error messaging. As an error propagates up through the layers of your application, each layer can add its own context to the error message. This provides a detailed narrative of the error's journey through your application, making it easier to diagnose and resolve issues. For instance, instead of just receiving a high-level error such as `"Could not get git branches"` or receiving a low-level error message like `"File 'packed-refs' not found"`, you could receive an error message like `"Could not get git branches because: Could not read 'refs/heads' directory and: File 'packed-refs' not found"`. This layered, multi-level view into where and why an error occurred significantly improves error diagnosis and resolution.
+Traditional error handling in JavaScript often provides a singular, generic
+error message that encapsulates the issue at hand. However, with complex
+applications, understanding the root cause of an issue often requires context
+from various levels of your application stack. The Errors as Values approach
+facilitates this by enabling layered error messaging. As an error propagates up
+through the layers of your application, each layer can add its own context to
+the error message. This provides a detailed narrative of the error's journey
+through your application, making it easier to diagnose and resolve issues. For
+instance, instead of just receiving a high-level error such as
+`"Could not get git branches"` or receiving a low-level error message like
+`"File 'packed-refs' not found"`, you could receive an error message like
+`"Could not get git branches because: Could not read 'refs/heads' directory and: File 'packed-refs' not found"`.
+This layered, multi-level view into where and why an error occurred
+significantly improves error diagnosis and resolution.
 
 # Examples
 
@@ -233,57 +246,69 @@ function readConfigFile(filePath: string): Config | Error {
 }
 ```
 
-I'm sure you noticed with our `Err` helper we can also change our return type to use `Result`, which is just a union type between `Error` and `T`.
+I'm sure you noticed with our `Err` helper we can also change our return type to
+use `Result`, which is just a union type between `Error` and `T`.
 
 ```ts
 function readConfigFile(filePath: string): Result<Config> {
   const fileContent = Try(Deno.readTextFileSync)(filePath);
   if (Err(fileContent)) {
-    return ErrMsg(fileContent, "Failed to read config file"); 
+    return ErrMsg(fileContent, "Failed to read config file");
   }
   const jsonData = Try(JSON.parse)(fileContent);
   return jsonData;
 }
 ```
 
-Now let's go into some cooler ways we can change control flow with `Ok`. `Ok` says that "hey that value's ok" and is written to work with the `??` nullish coalescing operator. Here's what it is and example of how to use it.
+Now let's go into some cooler ways we can change control flow with `Ok`. `Ok`
+says that "hey that value's ok" and is written to work with the `??` nullish
+coalescing operator. Here's what it is and example of how to use it.
 
 ```ts
 export function Ok<T>(value: Result<T>): T | null {
-  if(value instanceof Error) {
+  if (value instanceof Error) {
     return null;
   }
   return value;
 }
 ```
 
-Here we have eliminated one of the errors from our function by providing a default option for when it does fail by using the `Ok` function and the `??` nullish coalescing operator. If we can't read the file, we're going to return an Error. If we can't parse the JSON, we're going to return a blank object instead of an error.
+Here we have eliminated one of the errors from our function by providing a
+default option for when it does fail by using the `Ok` function and the `??`
+nullish coalescing operator. If we can't read the file, we're going to return an
+Error. If we can't parse the JSON, we're going to return a blank object instead
+of an error.
 
 ```ts
 function readConfigFile(filePath: string): Result<Config> {
   const fileContent = Try(Deno.readTextFileSync)(filePath);
   if (Err(fileContent)) {
-    return ErrMsg(fileContent, "Failed to read config file"); 
+    return ErrMsg(fileContent, "Failed to read config file");
   }
   const jsonData = Try(JSON.parse)(fileContent);
   return Ok(jsonData) ?? {};
 }
 ```
 
-I'll admit that this feature is much more useful for higher order functions like in this next example. This function has two ways of getting the information for Git branches, and if one fails it will back up to the other way.
+I'll admit that this feature is much more useful for higher order functions like
+in this next example. This function has two ways of getting the information for
+Git branches, and if one fails it will back up to the other way.
 
 ```ts
 export function getGitBranchesSync() {
   return Ok(getGitBranchesFromPackedRefsSync()) ??
-    getGitBranchesFromBranchFilesSync()
+    getGitBranchesFromBranchFilesSync();
 }
 ```
 
-Sometimes though you just need to throw an Error, or if you're prototyping you might not care about the error. For that I wrote `Unwrap`. It's a simple function that checks if the result is an `Error`, and if it is it will throw it. Otherwise it will return it. This can be useful sometimes.
+Sometimes though you just need to throw an Error, or if you're prototyping you
+might not care about the error. For that I wrote `Unwrap`. It's a simple
+function that checks if the result is an `Error`, and if it is it will throw it.
+Otherwise it will return it. This can be useful sometimes.
 
 ```ts
 export function Unwrap<T>(value: Result<T>): T {
-  if(value instanceof Error) {
+  if (value instanceof Error) {
     throw value;
   }
   return value;
@@ -292,14 +317,19 @@ export function Unwrap<T>(value: Result<T>): T {
 
 ## Fetching User Data
 
-In this example, we demonstrate how the Errors as Values (EaV) approach can provide greater control over the system's flow. If retrieving the cache fails, we attempt to access the primary DB. If this also fails, we turn to the backup DB. If all attempts fail, we return an error message indicating that all methods have failed. Each failure is also accompanied by a specific error message that can provide insights into why that particular method failed.
+In this example, we demonstrate how the Errors as Values (EaV) approach can
+provide greater control over the system's flow. If retrieving the cache fails,
+we attempt to access the primary DB. If this also fails, we turn to the backup
+DB. If all attempts fail, we return an error message indicating that all methods
+have failed. Each failure is also accompanied by a specific error message that
+can provide insights into why that particular method failed.
 
 ```ts
 type User = {
   id: string;
   name: string;
   // ... other fields
-}
+};
 
 function getUserData(userId: string): Result<User> {
   return Ok(getUserDataFromCache(userId)) ??
@@ -336,14 +366,25 @@ function getUserDataFromBackupDB(userId: string): Result<User> {
 }
 ```
 
-As shown, applying the Errors as Values paradigm to JavaScript and TypeScript can provide several advantages to our codebase. It makes error handling more explicit, improves code readability, enhances the debugging process, and promotes better code organization.
+As shown, applying the Errors as Values paradigm to JavaScript and TypeScript
+can provide several advantages to our codebase. It makes error handling more
+explicit, improves code readability, enhances the debugging process, and
+promotes better code organization.
 
-While the Errors as Values approach might seem unconventional and requires a shift in mindset, the benefits it provides make it a valuable addition to your coding toolkit. It's not about replacing every traditional try/catch with Errors as Values but about using the right tool for the job. Sometimes, a try/catch might be exactly what you need. Other times, Errors as Values might be a more appropriate choice.
+While the Errors as Values approach might seem unconventional and requires a
+shift in mindset, the benefits it provides make it a valuable addition to your
+coding toolkit. It's not about replacing every traditional try/catch with Errors
+as Values but about using the right tool for the job. Sometimes, a try/catch
+might be exactly what you need. Other times, Errors as Values might be a more
+appropriate choice.
 
-We hope you find this guide useful, and that it contributes to the continual improvement of your codebase. Keep coding, and remember: explicit error handling makes your application more reliable and easier to maintain. Happy coding!
+We hope you find this guide useful, and that it contributes to the continual
+improvement of your codebase. Keep coding, and remember: explicit error handling
+makes your application more reliable and easier to maintain. Happy coding!
 
 ---
 
-For more information, queries, or suggestions, please feel free to open an issue or submit a pull request. We're eager to hear from you!
+For more information, queries, or suggestions, please feel free to open an issue
+or submit a pull request. We're eager to hear from you!
 
 ---
