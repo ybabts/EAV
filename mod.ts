@@ -6,7 +6,7 @@ export type Result<
 > = T | E;
 
 export type CustomError<
-  C extends string | number = string | number,
+  C extends ValidCause = ValidCause,
   M extends string = string,
 > = Error & { message: M; cause: C };
 
@@ -20,7 +20,7 @@ export function addMsg<M extends string, E extends Error>(
   });
 }
 
-export function Err<C extends string | number, M extends string>(
+export function Err<C extends ValidCause, M extends string>(
   cause: C,
   message?: M,
 ): CustomError<C, M> {
@@ -29,13 +29,18 @@ export function Err<C extends string | number, M extends string>(
   }) as CustomError<C, M>;
 }
 
-export function Try<T extends (...args: any[]) => any>(
+export function Try<
+  T extends (...args: any[]) => any,
+  C extends ValidCause = ValidCause,
+>(
   func: T,
-): (...args: Parameters<T>) => ReturnType<T> | Error {
+  cause?: C,
+): (...args: Parameters<T>) => ReturnType<T> | CustomError<C> {
   return (...args: Parameters<T>) => {
     try {
       return func(...args);
     } catch (error) {
+      error.cause = cause;
       return error;
     }
   };
@@ -50,10 +55,11 @@ export function isErr<
 >(
   value: T,
   cause?: C,
-): value is Extract<T, CustomError<C, any>> {
+): value is Extract<T, CustomError<C, any>> & Extract<T, Error> {
   return value instanceof Error &&
     (cause === undefined || (value as CustomError<C, any>).cause === cause);
 }
+
 export function Ok<T>(value: Result<T>): T | null {
   if (value instanceof Error) {
     return null;
