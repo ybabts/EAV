@@ -41,7 +41,7 @@ export function CaptureErr<
       if (result instanceof Promise) {
         return result.catch((e) => {
           e.name = name ?? e.name;
-          return e as Err<N>;
+          return e as Promise<Err<N>>;
         });
       }
     } catch (error) {
