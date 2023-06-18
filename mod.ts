@@ -2,6 +2,7 @@
 
 export class Err<N extends string = "Error"> extends Error {
   name!: N;
+  cause?: Err;
   constructor(name?: N, message?: string) {
     super(message);
     if (name) {
