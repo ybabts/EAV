@@ -13,6 +13,7 @@ export class Err<N extends string = "Error"> extends Error {
 export type Result<T, E extends Error | Err = Err> = T | E;
 
 export type ExtractName<T> = T extends { name: infer N } ? N : never;
+
 export function isErr<R extends Result<any>, N extends ExtractName<R> & string>(
   value: R,
   name?: N,
