@@ -34,18 +34,23 @@ export function Ok<
 export function CaptureErr<
   T extends (...args: any[]) => any,
   N extends string,
->(fn: T, name?: N): (...args: Parameters<T>) => ReturnType<T> | Err<N> {
-  return (...args: Parameters<T>) => {
+>(
+  fn: T,
+  name?: N,
+  message?: string,
+): (...args: Parameters<T>) => ReturnType<T> | Err<N> {
+  return function CaptureErr(...args: Parameters<T>) {
     try {
       const result = fn(...args);
       if (result instanceof Promise) {
-        return result.catch((e) => {
-          e.name = name ?? e.name;
-          return e as Promise<Err<N>>;
+        return result.catch((e: Error) => {
+          e.cause = new Err(name ?? e.name, message ?? e.message);
+          return Promise.resolve(e);
         });
       }
+      return result;
     } catch (error) {
-      error.name = name ?? error.name;
+      error.cause = new Err(name ?? error.name, message ?? error.message);
       return error;
     }
   };
