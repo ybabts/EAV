@@ -37,17 +37,17 @@ approach leads to more explicit, readable, and maintainable code.
 
 Adopting the errors as values approach inherently leads to a more proactive
 error handling mechanism. The consumer of a function written using errors as
-values is always presented with the reality that the function could potentially
-return an error. This very nature of errors as values encourages, or rather
-necessitates, that the error be handled immediately at the point of function
-invocation. The possibility of an error being returned cannot be ignored or
-deferred; it must be addressed immediately at the point of function invocation.
-This way, error handling becomes an integral part of the normal control flow of
-the application. The real advantage of this is two fold: firstly it leads to
-more robust code as it reduces the likelihood of unhandled errors causing
-unexpected behavior or crashes. Secondly, it fosters a coding discipline where
-programmers are habitually conscious and cautious about potential failures and
-are more dilligent in managing them, leading to higher code quality overall.
+values is always presented with the possibility that the function could
+potentially return an error. This very nature of errors as values encourages, or
+rather necessitates, that the error be handled immediately at the point of
+function invocation. The possibility of an error being returned cannot be
+ignored or overlooked; it must be addressed immediately at the point of function
+invocation. This way, error handling becomes an integral part of the normal
+control flow of the application. The real advantage of this is two fold: firstly
+it leads to more robust code as it reduces the likelihood of unhandled errors
+causing unexpected behavior or crashes. Secondly, it fosters a coding discipline
+where programmers are habitually conscious and cautious about potential failures
+and are more dilligent in managing them, leading to higher code quality overall.
 
 # Limitations of Linters and Static Analysis Tools
 
@@ -79,7 +79,7 @@ time, which can prevent certain optimizations. This is because the engine must
 preserve the execution context until the end of the catch block, which can be
 resource-intensive for large blocks of code.
 
-This is where the Errors as Values (EAV) paradigm shines. By treating errors as
+This is where the Errors as Values (EAV) paradigm excels. By treating errors as
 regular return values, EAV encourages the use of smaller, more contained
 try/catch blocks. Instead of wrapping large chunks of code in a try/catch block,
 EAV typically uses these blocks around individual function calls that might
@@ -87,8 +87,9 @@ throw an error. This results in smaller execution contexts that need to be
 preserved, which can allow the V8 engine to optimize more effectively.
 
 In addition, by handling errors as regular values, EAV can make your code more
-predictable. This predictability can further improve the ability of the V8
-engine to make assumptions about your code and apply optimizations.
+predictable. This predictability can further improve the V8 engine's ability to
+optimize your code based on its assumptions about your code and apply
+optimizations.
 
 It's important to note that while EAV can potentially lead to better
 performance, the actual impact will depend on various factors, including the
@@ -327,9 +328,9 @@ if (isErr(result, "HTTP_FORBIDDEN")) {
 }
 ```
 
-Remember, these examples are just a starting point. As you become more familiar
-with EAV, you'll find that its principles can be applied in many different
-situations, helping you write more reliable and maintainable code.
+Remember, these examples are merely a starting point. As you become more
+familiar with EAV, you'll find that its principles can be applied in many
+different situations, helping you write more reliable and maintainable code.
 
 # Importing
 
