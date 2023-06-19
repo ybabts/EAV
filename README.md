@@ -330,9 +330,9 @@ if (isErr(result, "HTTP_FORBIDDEN")) {
 }
 ```
 
-Remember, these examples are merely a starting point. As you become more
-familiar with EAV, you'll find that its principles can be applied in many
-different situations, helping you write more reliable and maintainable code.
+Remember, these examples are a starting point. As you become more familiar with
+EAV, you'll find that its principles can be applied in many different
+situations, helping you write more reliable and maintainable code.
 
 # Importing
 
