@@ -5,6 +5,7 @@
   - [The Errors as Values Approach](#the-errors-as-values-approach)
   - [Why you should adope the Errors as Values Paradigm](#why-should-i-adopt-this-paradigm)
 - [Limitations of Linters and Static Analysis Tools](#limitations-of-linters-and-static-analysis-tools)
+- [Why choose Errors as Values over other Result Libraries](#why-choose-errors-as-values-over-other-result-libraries)
 - [V8 JIT Performance with Errors as Values](#v8-and-jit-compiler-performance)
 - [Leveraging Typescript's Type System](#leveraging-typescripts-type-system-with-errors-as-values)
 - [Practical Examples](#practical-examples)
@@ -66,6 +67,31 @@ handled. Errors become first-class citizens that can be reasoned about and
 manipulated just like any other value. As a result, developers gain more control
 over the error management in their programs, leading to more predictable and
 robust code.
+
+# Why choose Errors as Values over other Result Libraries
+
+While there are other libraries that attempt to mimic the "Result" type from
+languages like Rust, Errors as Values (EAV) offers several advantages that make
+it a superior choice for TypeScript and JavaScript developers.
+
+0. **Minimal Object Creation:** Other libraries often create additional objects
+   to represent successful and error outcomes. This can lead to unnecessary
+   memory usage and potential performance overhead. In contrast, EAV treats
+   errors as regular values, which means it doesn't need to create additional
+   objects. This makes EAV more efficient and lightweight.
+1. **Stronger Utilization of TypeScript's Type System:** EAV leverages
+   TypeScript's type system to its fullest. It uses union types to represent
+   potential outcomes and type guards for error checking. This results in more
+   explicit and type-safe code, making it easier to reason about the possible
+   outcomes of a function. Other libraries may not utilize the type system as
+   effectively, which can lead to less type-safe code.
+2. **Less Syntax Compared to Other Libraries:** While EAV does require some
+   additional syntax compared to traditional error handling, it's less than
+   what's required by other "Result"-like libraries. These libraries often
+   introduce new constructs to encapsulate successful and error outcomes, which
+   can lead to more complex and verbose code. In contrast, EAV uses existing
+   JavaScript and TypeScript constructs, resulting in cleaner and more concise
+   code.
 
 # V8 and JIT compiler Performance
 
