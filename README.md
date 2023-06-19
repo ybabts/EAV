@@ -1,25 +1,39 @@
-# Errors as Values - A Paradigm Shift in Error Handling
+# Table of Contents
+
+- [Introduction](#introduction)
+  - [The Problem with Traditional Error Handling](#the-problem-with-traditional-error-handling)
+  - [The Errors as Values Approach](#the-errors-as-values-approach)
+  - [Why you should adope the Errors as Values Paradigm](#why-should-i-adopt-this-paradigm)
+- [Limitations of Linters and Static Analysis Tools](#limitations-of-linters-and-static-analysis-tools)
+- [V8 JIT Performance with Errors as Values](#v8-and-jit-compiler-performance)
+- [Leveraging Typescript's Type System](#leveraging-typescripts-type-system-with-errors-as-values)
+- [Practical Examples](#practical-examples)
+  - [Reading a Configuration File](#example-1-reading-a-configuration-file)
+- [Importing Errors as Values into your project](#importing-eav-into-your-project)
+
+# Introduction
 
 Errors as values is an innovative approach to error handling in Typescript that
 treats errors not as exceptional circumstances but natural outcomes of
 operations. This approach moves away from the traditional try/catch model,
 promoting clarity, control, and explicitness in the error handling process.
 
-Traditional error handling relies on try/catch blocks where the errors are
-"thrown" and later "caught" in a completely different context. This model views
-errors as interruptions to the normal flow of a program, which often results in
-scattered and convoluted error handling code. In addition, the try/catch model
-makes it easy for developers to ignore or miss errors, leading to unexpected
-runtime issues and potentially system failures.
+<a id="the-problem-with-traditional-error-handling" ></a> Traditional error
+handling relies on try/catch blocks where the errors are "thrown" and later
+"caught" in a completely different context. This model views errors as
+interruptions to the normal flow of a program, which often results in scattered
+and convoluted error handling code. In addition, the try/catch model makes it
+easy for developers to ignore or miss errors, leading to unexpected runtime
+issues and potentially system failures.
 
-Errors as values encourages developers to handle errors right where they occur.
-By treating errors as returnable values from functions, we can deal with them at
-the same level as the rest of our application logic. The errors as values
-approach acknowledges that errors are just another type of result that a
-function can produce. This approach leads to more explicit, readable, and
-maintainable code.
+<a id="the-errors-as-values-approach" ></a>Errors as values encourages
+developers to handle errors right where they occur. By treating errors as
+returnable values from functions, we can deal with them at the same level as the
+rest of our application logic. The errors as values approach acknowledges that
+errors are just another type of result that a function can produce. This
+approach leads to more explicit, readable, and maintainable code.
 
-## Why should we adopt this paradigm?
+# Why should I adopt this paradigm?
 
 Adopting the errors as values approach inherently leads to a more proactive
 error handling mechanism. The consumer of a function written using errors as
@@ -35,7 +49,7 @@ unexpected behavior or crashes. Secondly, it fosters a coding discipline where
 programmers are habitually conscious and cautious about potential failures and
 are more dilligent in managing them, leading to higher code quality overall.
 
-## Don't we have linters and other static analysis tools to do this?
+# Limitations of Linters and Static Analysis Tools
 
 The dynamism and flexibility of JavaScript is a double-edged sword. While it
 empowers developers to write expressive and flexible code, it often makes static
@@ -51,340 +65,280 @@ manipulated just like any other value. As a result, developers gain more control
 over the error management in their programs, leading to more predictable and
 robust code.
 
-## Error messaging improvements
+# V8 and JIT compiler Performance
 
-Traditional error handling in JavaScript often provides a singular, generic
-error message that encapsulates the issue at hand. However, with complex
-applications, understanding the root cause of an issue often requires context
-from various levels of your application stack. The Errors as Values approach
-facilitates this by enabling layered error messaging. As an error propagates up
-through the layers of your application, each layer can add its own context to
-the error message. This provides a detailed narrative of the error's journey
-through your application, making it easier to diagnose and resolve issues. For
-instance, instead of just receiving a high-level error such as
-`"Could not get git branches"` or receiving a low-level error message like
-`"File 'packed-refs' not found"`, you could receive an error message like
-`"Could not get git branches because: Could not read 'refs/heads' directory and: File 'packed-refs' not found"`.
-This layered, multi-level view into where and why an error occurred
-significantly improves error diagnosis and resolution.
+The V8 engine, which powers JavaScript execution in Google Chrome and other
+modern browsers, uses a Just-In-Time (JIT) compiler to optimize code execution.
+The JIT compiler makes assumptions about your code to perform these
+optimizations. However, certain code patterns can cause the JIT compiler to
+"bailout" and deoptimize the code, leading to slower execution.
 
-# Examples
+One such pattern is the extensive use of try/catch blocks. When a try/catch
+block is encountered, the V8 engine has to be prepared for an exception at any
+time, which can prevent certain optimizations. This is because the engine must
+preserve the execution context until the end of the catch block, which can be
+resource-intensive for large blocks of code.
 
-In this section, we'll illustrate the Errors as Values approach using practical,
-real-world examples. Each example will be explained and contextualized, helping
-you understand how the errors as values philosophy is applied and how it can
-benefit you in various scenarios.
+This is where the Errors as Values (EAV) paradigm shines. By treating errors as
+regular return values, EAV encourages the use of smaller, more contained
+try/catch blocks. Instead of wrapping large chunks of code in a try/catch block,
+EAV typically uses these blocks around individual function calls that might
+throw an error. This results in smaller execution contexts that need to be
+preserved, which can allow the V8 engine to optimize more effectively.
 
-The examples will guide you on how to handle errors, how to propagate errors to
-the caller functions, and how to use the helper functions. These examples will
-also highlight the strengths of the errors as values approach, including its
-explicit nature, better context in error messages, and robust error handling
-mechanisms.
+In addition, by handling errors as regular values, EAV can make your code more
+predictable. This predictability can further improve the ability of the V8
+engine to make assumptions about your code and apply optimizations.
 
-Keep in mind that these examples are merely a starting point. As you grow more
-familiar with errors as values, you'll find that its principles can be applied
-in many different situations, helping you to write cleaner, more reliable code.
+It's important to note that while EAV can potentially lead to better
+performance, the actual impact will depend on various factors, including the
+specific nature of your code and the JavaScript engine's implementation details.
+Therefore, always consider using performance profiling tools to understand the
+impact of different coding paradigms on your application's performance.
 
-## Reading a File and parsing the text as JSON for a configuration file
+# Leveraging Typescript's Type System with Errors as Values
 
-This example demonstrates how to read a JSON file using the errors as values
-philosophy. Reading files is a common operation in many applications, but it's
-also one where errors can frequently occur. A file might not exist, may lack
-proper permissions, or its content could be improperly formatted.
+One of the key strengths of the Errors as Values (EAV) paradigm is how it
+leverages TypeScript's powerful type system. TypeScript's static types provide a
+way to describe the shape and behavior of objects within your code, which can be
+incredibly useful when dealing with errors.
 
-Here's the function in the traditional error handling fashion.
+## Union Types
+
+In the EAV paradigm, a function might return a result that could be an `Error`.
+To represent this, `Union` types are used extensively to make it explicit that
+the result of a function could be an `Error`, and what kind of `Error`s they
+could be.
+
+For example, consider a function readConfig that reads and parses a
+configuration file. This function could potentially encounter two types of
+errors: a read error if the file can't be read, and a parse error if the file's
+content can't be parsed. Therefore, the function's return type is a union of the
+configuration object type, `Err<"ReadError">`, and `Err<"ParseError">`.
+
+This explicit typing provides a clear understanding of all possible outcomes of
+the function. It also allows TypeScript's type checking to ensure that all
+potential errors are handled.
+
+## Type Guards and Error Checking
+
+The `isErr` function is a type guard that checks if a value is an instance of
+`Error`. If an optional name parameter is provided, it also checks if the
+error's name matches the provided name. This allows us to narrow down the type
+from a union of `T | Error` to just `T` or `Error`, enabling more precise error
+handling.
+
+For instance, after calling `readConfig`, we can use `isErr` to check if the
+result is a read error or a parse error, and handle each case appropriately. If
+the result isn't an error, TypeScript knows that it must be the configuration
+object, and can treat it as such.
+
+## Avoiding the any Type
+
+It's important to note that the `any` type in TypeScript can override all other
+types and cause the type checking portion of EAV to fail. For example
+`JSON.parse` returns an `any` type, which could potentially lead to runtime and
+type checking problems. Therefore, it's generally recommended to avoid the `any`
+type when using TypeScript.
+
+# Practical Examples
+
+In this section, we will walk through several practical examples that
+demonstrate the application of the Errors as Values (EAV) approach. These
+examples will help you understand how to handle and propagate errors, and how to
+use helper functions in real-world scenarios.
+
+## Example 1: Reading a Configuration File
+
+Our first example involves reading a configuration file, a common operation that
+can encounter various errors. We'll show how EAV can handle potential issues
+such as the file not existing, lacking proper permissions, or containing
+improperly formatted content.
+
+We'll start by defining a function that reads the file and parses its content.
+With EAV, we handle errors where they occur, so if an error arises during the
+reading or parsing process, it will be immediately caught and returned as a
+value. This allows the calling function to handle the error in the same context
+as the successful outcome.
 
 ```ts
-function readConfigFile(filePath: string): Config {
-  const fileContent = Deno.readTextFileSync(filePath);
-  const jsonData = JSON.parse(fileContent);
-  return jsonData as Config;
+function readConfig(filePath: string) {
+  const text = CaptureErr(Deno.readTextFileSync, "ReadError")(filePath);
+  if (isErr(text)) return text; // <-- Err<"ReadError">
+  const json = CaptureErr(JSON.parse, "ParseError")(text);
+  if (isErr(json)) return json as Err<"ParseError">;
+  return json as { port: number; host: string };
 }
+
+const config = readConfig("./config.json");
+//      ^ const config: { port: number; host: string } | Err<"ReadError"> | Err<"ParseError">
 ```
 
-This is a very simple function, but many things can go wrong during the
-operations of this function. Let's take a look at the errors as values version
-of this function.
+You can see here from the example code provided, the type information displays a
+`Union` type of all the potential outcomes of this function. It can either
+return the configuration object, a read error, or a parse error. The name of
+these errors allow you to see what errors could happen in the function return.
+You can also check for specific errors and narrow the type like this next code
+snippet.
 
 ```ts
-function readConfigFile(filePath: string): Config | Error {
-  try {
-    const fileContent = Deno.readTextFileSync(filePath);
-    const jsonData = JSON.parse(fileContent);
-    return jsonData as Config;
-  } catch (error) {
-    return error;
-  }
+const config = readConfig("./config.json");
+//      ^ const config: { port: number; host: string } | Err<"ReadError"> | Err<"ParseError">
+if (isErr(config, "ReadError")) {
+  console.error("Could not read config file", config.message);
 }
+if (isErr(config, "ParseError")) {
+  console.error("Could not parse config file", config.message);
+}
+console.log(config);
+// ^ const config: { port: number; host: string }
 ```
 
-This is the simplist way to implement errors as values in Typescript. You can
-see that instead of expecting the caller of the function to catch the error, we
-do it ourselves and return it as an error. Let's see what happens when we try to
-use this function.
+## Example 2: Fetching User Data
+
+In the second example, we'll demonstrate how EAV can provide greater control
+over the system's flow when fetching user data. We'll define a function that
+attempts to retrieve user data from three different sources: a cache, a primary
+database, and a backup database.
 
 ```ts
-function loadConfig(): Config {
-  let defaultConfig: Config = {
-    token: "",
-    repo: "",
-  };
-  const config = readConfigFile("./config.json");
-  for (const key in config) {
-    defaultConfig[key as keyof Config] = config[key as keyof Config];
-  } //                                    /\
-  return config; //       Element implicitly has an 'any' type because
-  //                   expression of type 'keyof Config' can't be used
-  //                                   to index type 'Error | Config'.
-  //          Property 'token' does not exist on type 'Error | Config'.
-}
-```
-
-Here our editor is telling us that config is a union type of "`Error | Config`",
-which means that we need to handle the case in which this errors. We can do this
-a couple of ways, but my favorite is called
-[narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html).
-Essentially we're checking if the return value of `readConfigFile` is an
-`Error`, and if it is we're going to change our control flow to avoid trying to
-use it like a `Config`.
-
-Here's what that looks like.
-
-```ts
-function loadConfig(): Config {
-  let defaultConfig: Config = {
-    token: "",
-    repo: "",
-  };
-  const config = readConfigFile("./config.json");
-  if (config instanceof Error) { // here we check if readConfigFile errored
-    return defaultConfig;
-  }
-  for (const key in config) {
-    defaultConfig[key as keyof Config] = config[key as keyof Config];
-  }
-  return config;
-}
-```
-
-Here we say that if the config file is an `Error`, we're going just return the
-default config instead. Now this might handle the error, but it looks mighty
-ugly and it's a litlte harder to read than what we're used to. So we have some
-helper functions and types to make this easier for us.
-
-Meet `Try`, no not that `try`, this `Try`. `Try` is a function that takes in
-another function and wraps it in a `try/catch` block. This makes any function
-have an interface that follows the errors as values paradigm. This is useful for
-all the functions that currently do not follow the paradigm.
-
-```ts
-export function Try<T extends (...args: any[]) => any>(
-  func: T,
-): (...args: Parameters<T>) => ReturnType<T> | Error {
-  return (...args: Parameters<T>) => {
-    try {
-      return func(...args);
-    } catch (error) {
-      return error;
-    }
-  };
-}
-```
-
-Here's an example of it's usage in our previous example.
-
-```ts
-function readConfigFile(filePath: string): Config | Error {
-  const fileContent = Try(Deno.readTextFileSync)(filePath);
-  const jsonData = Try(JSON.parse)(fileContent);
-  return jsonData; //                  /\
-  //             Argument of type 'string | Error' is not assignable
-  //                                   to parameter of type 'string'.
-  //                 Type 'Error' is not assignable to type 'string'.
-}
-```
-
-As you can see we already get a type error when we implemented `Try` into our
-function. This is good, it means we have an unhandled error afoot. Now we need
-to handle these errors. In this case the function cannot continue if the file
-content cannot be read, so we should use
-[type narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
-here to handle the error. We'll use another helper function here called `Err`.
-
-```ts
-export function Err(value: Result<any>): value is T {
-  return value instanceof Error;
-}
-```
-
-`Err` is very simple, it checks if the value is an `Error` and returns it as a
-boolean.
-
-```ts
-function readConfigFile(filePath: string): Config | Error {
-  const fileContent = Try(Deno.readTextFileSync)(filePath);
-  if (Err(fileContent)) { // We're using Err to check if readTextFileSync errored
-    return fileContent; // and if it did, we're going to return that error
-  }
-  const jsonData = Try(JSON.parse)(fileContent);
-  return jsonData;
-}
-```
-
-Now we're handling the read errors and passing them up, but this error isn't
-very descriptive. We can use another helper function `ErrMsg` that lets us add
-another message onto an error to make it more descriptive.
-
-```ts
-function readConfigFile(filePath: string): Config | Error {
-  const fileContent = Try(Deno.readTextFileSync)(filePath);
-  if (Err(fileContent)) {
-    return ErrMsg(fileContent, "Failed to read config file"); // Now we're making it more
-  } //                                       more clear that we're returning an Error and
-  const jsonData = Try(JSON.parse)(fileContent); //     adding more detail to the message
-  return jsonData;
-}
-```
-
-I'm sure you noticed with our `Err` helper we can also change our return type to
-use `Result`, which is just a union type between `Error` and `T`.
-
-```ts
-function readConfigFile(filePath: string): Result<Config> {
-  const fileContent = Try(Deno.readTextFileSync)(filePath);
-  if (Err(fileContent)) {
-    return ErrMsg(fileContent, "Failed to read config file");
-  }
-  const jsonData = Try(JSON.parse)(fileContent);
-  return jsonData;
-}
-```
-
-Now let's go into some cooler ways we can change control flow with `Ok`. `Ok`
-says that "hey that value's ok" and is written to work with the `??` nullish
-coalescing operator. Here's what it is and example of how to use it.
-
-```ts
-export function Ok<T>(value: Result<T>): T | null {
-  if (value instanceof Error) {
-    return null;
-  }
-  return value;
-}
-```
-
-Here we have eliminated one of the errors from our function by providing a
-default option for when it does fail by using the `Ok` function and the `??`
-nullish coalescing operator. If we can't read the file, we're going to return an
-Error. If we can't parse the JSON, we're going to return a blank object instead
-of an error.
-
-```ts
-function readConfigFile(filePath: string): Result<Config> {
-  const fileContent = Try(Deno.readTextFileSync)(filePath);
-  if (Err(fileContent)) {
-    return ErrMsg(fileContent, "Failed to read config file");
-  }
-  const jsonData = Try(JSON.parse)(fileContent);
-  return Ok(jsonData) ?? {};
-}
-```
-
-I'll admit that this feature is much more useful for higher order functions like
-in this next example. This function has two ways of getting the information for
-Git branches, and if one fails it will back up to the other way.
-
-```ts
-export function getGitBranchesSync() {
-  return Ok(getGitBranchesFromPackedRefsSync()) ??
-    getGitBranchesFromBranchFilesSync();
-}
-```
-
-Sometimes though you just need to throw an Error, or if you're prototyping you
-might not care about the error. For that I wrote `Unwrap`. It's a simple
-function that checks if the result is an `Error`, and if it is it will throw it.
-Otherwise it will return it. This can be useful sometimes.
-
-```ts
-export function Unwrap<T>(value: Result<T>): T {
-  if (value instanceof Error) {
-    throw value;
-  }
-  return value;
-}
-```
-
-## Fetching User Data
-
-In this example, we demonstrate how the Errors as Values (EaV) approach can
-provide greater control over the system's flow. If retrieving the cache fails,
-we attempt to access the primary DB. If this also fails, we turn to the backup
-DB. If all attempts fail, we return an error message indicating that all methods
-have failed. Each failure is also accompanied by a specific error message that
-can provide insights into why that particular method failed.
-
-```ts
-type User = {
-  id: string;
+type UserData = {
+  id: number;
   name: string;
-  // ... other fields
+  email: string;
 };
 
-function getUserData(userId: string): Result<User> {
-  return Ok(getUserDataFromCache(userId)) ??
-    Ok(getUserDataFromPrimaryDB(userId)) ??
-    Ok(getUserDataFromBackupDB(userId)) ??
-    new Error("Failed to get user data from all sources");
+const cache = new Map<string, UserData>();
+
+function getFromCache(key: string) {
+  if (cache.has(key)) return cache.get(key);
+  return new Err("CacheMiss");
 }
 
-function getUserDataFromCache(userId: string): Result<User> {
-  // suppose fetchDataFromCache can throw Error
-  const data = Try(fetchDataFromCache)(userId);
-  if (Err(data)) {
-    return ErrMsg(data, "Could not fetch data from cache");
-  }
-  return data;
+async function fetchFromPrimaryDatabase(key: string) {
+  const res = await CaptureErr(fetch, "FetchError")(
+    `https://localhost:8123/${key}`,
+  );
+  if (isErr(res)) return res;
+  const json = await CaptureErr(res.json.bind(res), "JSONParseError")();
+  if (isErr(json)) return json as Err<"JSONParseError">;
+  return json as UserData;
 }
 
-function getUserDataFromPrimaryDB(userId: string): Result<User> {
-  // suppose fetchDataFromPrimaryDB can throw Error
-  const data = Try(fetchDataFromPrimaryDB)(userId);
-  if (Err(data)) {
-    return ErrMsg(data, "Could not fetch data from primary database");
-  }
-  return data;
+async function fetchFromBackupDatabase(key: string) {
+  const res = await CaptureErr(fetch, "FetchError")(
+    `https://localhost:8123/${key}`,
+  );
+  if (isErr(res)) return res;
+  const json = await CaptureErr(res.json.bind(res), "JSONParseError")();
+  if (isErr(json)) return json as Err<"JSONParseError">;
+  return json as UserData;
 }
 
-function getUserDataFromBackupDB(userId: string): Result<User> {
-  // suppose fetchDataFromBackupDB can throw Error
-  const data = Try(fetchDataFromBackupDB)(userId);
-  if (Err(data)) {
-    return ErrMsg(data, "Could not fetch data from backup database");
-  }
-  return data;
+async function fetchUser(key: string) {
+  return Ok(getFromCache(key)) ??
+    await fetchFromPrimaryDatabase(key) ??
+    await fetchFromBackupDatabase(key);
 }
 ```
 
-As shown, applying the Errors as Values paradigm to JavaScript and TypeScript
-can provide several advantages to our codebase. It makes error handling more
-explicit, improves code readability, enhances the debugging process, and
-promotes better code organization.
+With EAV, if an error occurs at any point, it will be immediately caught and
+handled. This allows us to implement a fallback mechanism: if retrieving data
+from the cache fails, we try the primary database, and if that also fails, we
+try the backup database. If all attempts fail, we return an error indicating
+that all methods have failed. Each failure is accompanied by a specific error
+message, providing insights into why each method failed.
 
-While the Errors as Values approach might seem unconventional and requires a
-shift in mindset, the benefits it provides make it a valuable addition to your
-coding toolkit. It's not about replacing every traditional try/catch with Errors
-as Values but about using the right tool for the job. Sometimes, a try/catch
-might be exactly what you need. Other times, Errors as Values might be a more
-appropriate choice.
+## Example 3: Handling API Responses
 
-We hope you find this guide useful, and that it contributes to the continual
-improvement of your codebase. Keep coding, and remember: explicit error handling
-makes your application more reliable and easier to maintain. Happy coding!
+Our final example involves handling responses from an API. APIs often return
+errors as part of the response, and EAV provides a straightforward way to handle
+these errors.
 
----
+```ts
+import { StatusCodes } from "https://deno.land/x/http_status@v1.0.1/mod.ts";
 
-For more information, queries, or suggestions, please feel free to open an issue
-or submit a pull request. We're eager to hear from you!
+type NotOKStatusCodes = Exclude<keyof typeof StatusCodes, "OK">;
 
----
+export async function fetchDataFromAPI() {
+  const response = await CaptureErr(
+    fetch,
+    "Fetch Error",
+  )("https://api.opendota.com/api/heroes");
+  if (isErr(response)) {
+    return response;
+  }
+  if (!response.ok) {
+    return new Err<`HTTP_${NotOKStatusCodes}`>(
+      `HTTP_${StatusCodes[response.status] as NotOKStatusCodes}`,
+      response.statusText +
+        ": " +
+        (await response.json() as { message: string }).message,
+    );
+  }
+  const json = await CaptureErr(
+    response.json.bind(response),
+    "JSON Parse Error",
+  )() as Err<"JSON Parse Error"> | { [key: string]: any };
+  if (isErr(json)) {
+    return json;
+  }
+  return json;
+}
+```
+
+We'll define a function that makes an API request and processes the response. If
+the API returns an error, our function will catch it and return it as a value.
+This allows the calling function to handle the error in the same context as the
+successful outcome, leading to cleaner and more predictable code.
+
+```ts
+export async function fetchDataFromAPI() {
+  const response = await CaptureErr(
+    fetch,
+    "Fetch Error",
+  )("https://api.opendota.com/api/heroes");
+  if (isErr(response)) {
+    return response;
+  }
+  if (!response.ok) {
+    return new Err<`HTTP_${NotOKStatusCodes}`>(
+      `HTTP_${StatusCodes[response.status] as NotOKStatusCodes}`,
+      response.statusText +
+        ": " +
+        (await response.json() as { message: string }).message,
+    );
+  }
+  const json = await CaptureErr(
+    response.json.bind(response),
+    "JSON Parse Error",
+  )() as Err<"JSON Parse Error"> | { [key: string]: any };
+  if (isErr(json)) {
+    return json;
+  }
+  return json;
+}
+
+const result = await fetchDataFromAPI();
+//     ^ = const result: Result<Hero[], Err<Exclude<keyof StatusCodes, "OK">>>
+if (isErr(result, "HTTP_FORBIDDEN")) {
+  console.error(result);
+  //             ^ = const result: Err<Exclude<keyof StatusCodes, "OK">>
+}
+```
+
+Remember, these examples are just a starting point. As you become more familiar
+with EAV, you'll find that its principles can be applied in many different
+situations, helping you write more reliable and maintainable code.
+
+# Importing
+
+To use the Errors as Values (EAV) library in your project, import the necessary
+functions or classes using ES6 imports. Here's an example:
+
+```ts
+import { isErr, Err, ... } from "https://deno.land/x/eav@0.1.0/mod.ts";
+```
+
+Remember to specify the version number (`0.1.0` in this example) to ensure
+you're using a stable, known version of the library.
