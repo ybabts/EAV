@@ -9,6 +9,8 @@
 - [Leveraging Typescript's Type System](#leveraging-typescripts-type-system-with-errors-as-values)
 - [Practical Examples](#practical-examples)
   - [Reading a Configuration File](#example-1-reading-a-configuration-file)
+  - [Fetching User Data](#example-2-fetching-user-data)
+  - [Handling API Calls](#example-3-handling-api-responses)
 - [Importing Errors as Values into your project](#importing-eav-into-your-project)
 
 # Introduction
