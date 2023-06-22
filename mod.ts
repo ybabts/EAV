@@ -37,25 +37,23 @@ export function CaptureErr<
   T extends (...args: any[]) => any,
   N extends string,
 >(
+  name: N,
   fn: T,
-  name?: N,
   message?: string,
-): (...args: Parameters<T>) => ReturnType<T> | Err<N> {
-  return function CaptureErr(...args: Parameters<T>) {
-    try {
-      const result = fn(...args);
-      if (result instanceof Promise) {
-        return result.catch((e: Error) => {
-          e.cause = new Err(name ?? e.name, message ?? e.message);
-          return Promise.resolve(e);
-        });
-      }
-      return result;
-    } catch (error) {
-      error.cause = new Err(name ?? error.name, message ?? error.message);
-      return error;
+): ReturnType<T> | Err<N> {
+  try {
+    const result = fn();
+    if (result instanceof Promise) {
+      return result.catch((e: Error) => {
+        e.cause = new Err(name ?? e.name, message ?? e.message);
+        return Promise.resolve(e);
+      }) as ReturnType<T> | Err<N>;
     }
-  };
+    return result;
+  } catch (error) {
+    error.cause = new Err(name ?? error.name, message ?? error.message);
+    return error;
+  }
 }
 
 export function IgnoreErr<T>(value: Result<T>): T {
