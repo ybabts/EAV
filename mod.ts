@@ -19,7 +19,13 @@ export function isErr<R extends Result<any>, N extends ExtractName<R> & string>(
   value: R,
   name?: N,
 ): value is Extract<R, Err<N>> & Extract<R, Error> {
-  return value instanceof Error && (name === undefined || value.name === name);
+  if (!(value instanceof Error)) return false;
+  if (name === undefined) return true;
+  if (value.name === name) return true;
+  if (value.cause instanceof Error) {
+    return isErr(value.cause, name);
+  }
+  return false;
 }
 
 export function Ok<
