@@ -115,7 +115,7 @@ export function CaptureErr<
           name,
           message,
         );
-        return Promise.resolve(capturedError as Err<N>);
+        return capturedError as Err<N>;
       }) as any;
       //     ^ BEGONE TYPE ERRORS!
       // TODO(ybabts) figure out how to get this conditional type to work
