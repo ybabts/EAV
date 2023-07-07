@@ -53,11 +53,12 @@ export function CaptureErr<
   try {
     const result = fn();
     if (result instanceof Promise) {
-      // this is giving type errors...
       return result.catch((e: Error) => {
         e.cause = new Err(name ?? e.name, message ?? e.message);
         return Promise.resolve(e as Err<N>);
-      }) as Promise<InnerType<R> | Err<N>>;
+      }) as any;
+      //     ^ BEGONE TYPE ERRORS!
+      // TODO(ybabts) figure out how to get this conditional type to work
     }
     return result;
   } catch (error) {
