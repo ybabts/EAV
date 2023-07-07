@@ -1,5 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
 
+const errSymbol = Symbol("Err");
+
+declare global {
+  interface Error {
+    [errSymbol]: true;
+  }
+}
+
 /**
  * A custom class that extends Error that allows for namable Errors inside
  * the type system.
