@@ -312,6 +312,11 @@ import { StatusCodes } from "https://deno.land/x/http_status@v1.0.1/mod.ts";
 
 type NotOKStatusCodes = Exclude<keyof typeof StatusCodes, "OK">;
 
+type HeroData = {
+  id: number;
+  name: string;
+};
+
 export async function fetchDataFromAPI() {
   const res = await CaptureErr(
     "Fetch Error",
@@ -330,7 +335,7 @@ export async function fetchDataFromAPI() {
   }
   const json = await CaptureErr(
     "JSON Error",
-    (): Promise<{ [key: string]: any }> => res.json(),
+    (): Promise<HeroData[]> => res.json(),
   );
   if (isErr(json)) {
     return json;
