@@ -112,8 +112,8 @@ export function CaptureErr<
     if (result instanceof Promise) {
       return result.catch((capturedError: Error) => {
         capturedError.cause = new Err(
-          name ?? capturedError.name,
-          message ?? capturedError.message,
+          name,
+          message,
         );
         return Promise.resolve(capturedError as Err<N>);
       }) as any;
