@@ -110,9 +110,12 @@ export function CaptureErr<
   try {
     const result = callback();
     if (result instanceof Promise) {
-      return result.catch((e: Error) => {
-        e.cause = new Err(name ?? e.name, message ?? e.message);
-        return Promise.resolve(e as Err<N>);
+      return result.catch((capturedError: Error) => {
+        capturedError.cause = new Err(
+          name ?? capturedError.name,
+          message ?? capturedError.message,
+        );
+        return Promise.resolve(capturedError as Err<N>);
       }) as any;
       //     ^ BEGONE TYPE ERRORS!
       // TODO(ybabts) figure out how to get this conditional type to work
