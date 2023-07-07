@@ -118,9 +118,12 @@ export function CaptureErr<
       // TODO(ybabts) figure out how to get this conditional type to work
     }
     return result;
-  } catch (error) {
-    error.cause = new Err(name ?? error.name, message ?? error.message);
-    return error;
+  } catch (capturedError) {
+    capturedError.cause = new Err(
+      name ?? capturedError.name,
+      message ?? capturedError.message,
+    );
+    return capturedError;
   }
 }
 
