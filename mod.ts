@@ -67,7 +67,7 @@ export function CaptureErr<
   }
 }
 
-export function IgnoreErr<T>(value: Result<T>): T {
+export function UnwrapErr<T>(value: Result<T>): T {
   if (value instanceof Error) {
     throw value;
   }
