@@ -285,8 +285,12 @@ async function fetchFromBackupDatabase(key: string) {
 
 async function fetchUser(key: string) {
   return Ok(getFromCache(key)) ??
-    await fetchFromPrimaryDatabase(key) ??
-    await fetchFromBackupDatabase(key);
+    Ok(await fetchFromPrimaryDatabase(key)) ??
+    Ok(await fetchFromBackupDatabase(key)) ??
+    new Err(
+      "FetchError",
+      "Could not retrive user from cache, primary database and secondary database.",
+    );
 }
 ```
 
