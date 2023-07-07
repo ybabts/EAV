@@ -229,10 +229,10 @@ snippet.
 const config = readConfig("./config.json");
 //      ^ const config: { port: number; host: string } | Err<"ReadError"> | Err<"ParseError">
 if (isErr(config, "ReadError")) {
-  console.error("Could not read config file", config.message);
+  throw new Err("Read Error", "Could not read config file", config);
 }
 if (isErr(config, "ParseError")) {
-  console.error("Could not parse config file", config.message);
+  throw new Err("Parse Error", "Could not parse config file", config);
 }
 console.log(config);
 // ^ const config: { port: number; host: string }
