@@ -350,38 +350,16 @@ This allows the calling function to handle the error in the same context as the
 successful outcome, leading to cleaner and more predictable code.
 
 ```ts
-export async function fetchDataFromAPI() {
-  const res = await CaptureErr(
-    "Fetch Error",
-    () => fetch("https://api.opendota.com/api/heroes"),
-  );
-  if (isErr(res)) {
-    return res;
-  }
-  if (!res.ok) {
-    return new Err<`HTTP_${NotOKStatusCodes}`>(
-      `HTTP_${StatusCodes[res.status] as NotOKStatusCodes}`,
-      res.statusText +
-        ": " +
-        (await res.json() as { message: string }).message,
-    );
-  }
-  const json = await CaptureErr(
-    "JSON Error",
-    (): Promise<{ [key: string]: any }> => res.json(),
-  );
-  if (isErr(json)) {
-    return json;
-  }
-  return json;
-}
-
 const result = await fetchDataFromAPI();
-//     ^ = const result: Result<Hero[], Err<Exclude<keyof StatusCodes, "OK">>>
+//     ^ = const result: Result<HeroData[], Err<Exclude<keyof typeof StatusCodes, "OK">>>
 if (isErr(result, "HTTP_FORBIDDEN")) {
   console.error(result);
-  //             ^ = const result: Err<Exclude<keyof StatusCodes, "OK">>
+  //             ^ = const result: Err<Exclude<keyof typeof StatusCodes, "OK">>
 }
+// const result: Result<
+//    HeroData[],
+//    Err<Exclude<keyof typeof StatusCodes, "OK" | "HTTP_FORBIDDEN">>
+// >
 ```
 
 Remember, these examples are a starting point. As you become more familiar with
