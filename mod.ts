@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 
-const errSymbol = Symbol("Err");
+const baseErrorSymbol = Symbol("Error");
 
 declare global {
   interface Error {
-    [errSymbol]: true;
+    [baseErrorSymbol]: true;
   }
 }
 
@@ -35,7 +35,9 @@ export class Err<N extends string = "Error"> extends Error {
  */
 export type Result<T, E extends Error | Err = Err<string>> = T | E;
 
-type ExtractName<T> = T extends { name: infer N } ? N : never;
+type ExtractName<T> = T extends Error & { name: infer N } ? N : never;
+
+type SymboledError<N extends string> = { [baseErrorSymbol]: true; name: N };
 
 /**
  * Returns whether a `Result` is an instance of an Error. If a `name` is provided,
@@ -53,10 +55,13 @@ type ExtractName<T> = T extends { name: infer N } ? N : never;
  * }
  * ```
  */
-export function isErr<R extends Result<any>, N extends ExtractName<R> & string>(
+export function isErr<
+  R extends Result<any>,
+  N extends ExtractName<R> & string,
+>(
   result: R,
   name?: N,
-): result is Extract<R, Err<N>> & Extract<R, Error> {
+): result is Extract<R, SymboledError<N>> {
   if (!(result instanceof Error)) return false;
   if (name === undefined) return true;
   if (result.name === name) return true;
