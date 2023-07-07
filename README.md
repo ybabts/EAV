@@ -14,6 +14,18 @@
   - [Handling API Calls](#example-3-handling-api-responses)
 - [Importing Errors as Values into your project](#importing-eav-into-your-project)
 
+# Importing
+
+To use the Errors as Values (EAV) library in your project, import the necessary
+functions or classes using ES6 imports. Here's an example:
+
+```ts
+import { isErr, Err, ... } from "https://deno.land/x/eav@1.0.0/mod.ts";
+```
+
+Remember to specify the version number (`1.0.0` in this example) to ensure
+you're using a stable, known version of the library.
+
 # Introduction
 
 Errors as values is an innovative approach to error handling in Typescript that
@@ -192,9 +204,12 @@ as the successful outcome.
 
 ```ts
 function readConfig(filePath: string) {
-  const text = CaptureErr(Deno.readTextFileSync, "ReadError")(filePath);
+  const text = CaptureErr("ReadError", () => Deno.readTextFileSync(filePath));
   if (isErr(text)) return text; // <-- Err<"ReadError">
-  const json = CaptureErr(JSON.parse, "ParseError")(text);
+  const json = CaptureErr(
+    "ParseError",
+    (): { port: number; host: string } => JSON.parse(text),
+  );
   if (isErr(json)) return json as Err<"ParseError">;
   return json as { port: number; host: string };
 }
@@ -245,23 +260,27 @@ function getFromCache(key: string) {
 }
 
 async function fetchFromPrimaryDatabase(key: string) {
-  const res = await CaptureErr(fetch, "FetchError")(
-    `https://localhost:8123/${key}`,
-  );
+  const res = await CaptureErr("FetchError", () =>
+    fetch(
+      `https://localhost:8123/${key}`,
+    ));
   if (isErr(res)) return res;
-  const json = await CaptureErr(res.json.bind(res), "JSONParseError")();
-  if (isErr(json)) return json as Err<"JSONParseError">;
-  return json as UserData;
+  return await CaptureErr(
+    "JSONParseError",
+    (): Promise<UserData> => res.json(),
+  );
 }
 
 async function fetchFromBackupDatabase(key: string) {
-  const res = await CaptureErr(fetch, "FetchError")(
-    `https://localhost:8123/${key}`,
+  const res = await CaptureErr(
+    "FetchError",
+    () => fetch(`https://localhost:8123/${key}`),
   );
   if (isErr(res)) return res;
-  const json = await CaptureErr(res.json.bind(res), "JSONParseError")();
-  if (isErr(json)) return json as Err<"JSONParseError">;
-  return json as UserData;
+  return await CaptureErr(
+    "JSONParseError",
+    (): Promise<UserData> => res.json(),
+  );
 }
 
 async function fetchUser(key: string) {
@@ -290,25 +309,25 @@ import { StatusCodes } from "https://deno.land/x/http_status@v1.0.1/mod.ts";
 type NotOKStatusCodes = Exclude<keyof typeof StatusCodes, "OK">;
 
 export async function fetchDataFromAPI() {
-  const response = await CaptureErr(
-    fetch,
+  const res = await CaptureErr(
     "Fetch Error",
-  )("https://api.opendota.com/api/heroes");
-  if (isErr(response)) {
-    return response;
+    () => fetch("https://api.opendota.com/api/heroes"),
+  );
+  if (isErr(res)) {
+    return res;
   }
-  if (!response.ok) {
+  if (!res.ok) {
     return new Err<`HTTP_${NotOKStatusCodes}`>(
-      `HTTP_${StatusCodes[response.status] as NotOKStatusCodes}`,
-      response.statusText +
+      `HTTP_${StatusCodes[res.status] as NotOKStatusCodes}`,
+      res.statusText +
         ": " +
-        (await response.json() as { message: string }).message,
+        (await res.json() as { message: string }).message,
     );
   }
   const json = await CaptureErr(
-    response.json.bind(response),
-    "JSON Parse Error",
-  )() as Err<"JSON Parse Error"> | { [key: string]: any };
+    "JSON Error",
+    (): Promise<{ [key: string]: any }> => res.json(),
+  );
   if (isErr(json)) {
     return json;
   }
@@ -323,25 +342,25 @@ successful outcome, leading to cleaner and more predictable code.
 
 ```ts
 export async function fetchDataFromAPI() {
-  const response = await CaptureErr(
-    fetch,
+  const res = await CaptureErr(
     "Fetch Error",
-  )("https://api.opendota.com/api/heroes");
-  if (isErr(response)) {
-    return response;
+    () => fetch("https://api.opendota.com/api/heroes"),
+  );
+  if (isErr(res)) {
+    return res;
   }
-  if (!response.ok) {
+  if (!res.ok) {
     return new Err<`HTTP_${NotOKStatusCodes}`>(
-      `HTTP_${StatusCodes[response.status] as NotOKStatusCodes}`,
-      response.statusText +
+      `HTTP_${StatusCodes[res.status] as NotOKStatusCodes}`,
+      res.statusText +
         ": " +
-        (await response.json() as { message: string }).message,
+        (await res.json() as { message: string }).message,
     );
   }
   const json = await CaptureErr(
-    response.json.bind(response),
-    "JSON Parse Error",
-  )() as Err<"JSON Parse Error"> | { [key: string]: any };
+    "JSON Error",
+    (): Promise<{ [key: string]: any }> => res.json(),
+  );
   if (isErr(json)) {
     return json;
   }
@@ -359,15 +378,3 @@ if (isErr(result, "HTTP_FORBIDDEN")) {
 Remember, these examples are a starting point. As you become more familiar with
 EAV, you'll find that its principles can be applied in many different
 situations, helping you write more reliable and maintainable code.
-
-# Importing
-
-To use the Errors as Values (EAV) library in your project, import the necessary
-functions or classes using ES6 imports. Here's an example:
-
-```ts
-import { isErr, Err, ... } from "https://deno.land/x/eav@0.1.0/mod.ts";
-```
-
-Remember to specify the version number (`0.1.0` in this example) to ensure
-you're using a stable, known version of the library.
