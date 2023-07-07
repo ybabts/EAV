@@ -67,9 +67,9 @@ export function CaptureErr<
   }
 }
 
-export function UnwrapErr<T>(value: Result<T>): T {
-  if (value instanceof Error) {
-    throw value;
+export function UnwrapErr<T>(result: Result<T>): T {
+  if (result instanceof Error) {
+    throw result;
   }
-  return value;
+  return result;
 }
