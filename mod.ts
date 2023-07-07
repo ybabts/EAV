@@ -29,9 +29,9 @@ export function isErr<R extends Result<any>, N extends ExtractName<R> & string>(
 }
 
 export function Ok<
-  R extends Result<any>,
+  R extends any,
 >(
-  value: R,
+  value: Result<R>,
 ): R | null {
   if (isErr(value)) {
     return null;
@@ -39,21 +39,25 @@ export function Ok<
   return value;
 }
 
+type InnerType<T> = T extends Promise<infer U> ? U : never;
+
 export function CaptureErr<
-  T extends (...args: any[]) => any,
+  F extends (...args: any[]) => any,
   N extends string,
+  R extends ReturnType<F>,
 >(
   name: N,
-  fn: T,
+  fn: F,
   message?: string,
-): ReturnType<T> | Err<N> {
+): R extends Promise<any> ? Promise<InnerType<R> | Err<N>> : R | Err<N> {
   try {
     const result = fn();
     if (result instanceof Promise) {
+      // this is giving type errors...
       return result.catch((e: Error) => {
         e.cause = new Err(name ?? e.name, message ?? e.message);
-        return Promise.resolve(e);
-      }) as ReturnType<T> | Err<N>;
+        return Promise.resolve(e as Err<N>);
+      }) as Promise<InnerType<R> | Err<N>>;
     }
     return result;
   } catch (error) {
