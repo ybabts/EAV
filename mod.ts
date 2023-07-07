@@ -120,8 +120,8 @@ export function CaptureErr<
     return result;
   } catch (capturedError) {
     capturedError.cause = new Err(
-      name ?? capturedError.name,
-      message ?? capturedError.message,
+      name,
+      message,
     );
     return capturedError;
   }
