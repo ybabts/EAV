@@ -3,7 +3,7 @@
 - [Introduction](#introduction)
   - [The Problem with Traditional Error Handling](#the-problem-with-traditional-error-handling)
   - [The Errors as Values Approach](#the-errors-as-values-approach)
-  - [Why you should adope the Errors as Values Paradigm](#why-should-i-adopt-this-paradigm)
+  - [Why you should adopt the Errors as Values Paradigm](#why-should-i-adopt-this-paradigm)
 - [Limitations of Linters and Static Analysis Tools](#limitations-of-linters-and-static-analysis-tools)
 - [Why choose Errors as Values over other Result Libraries](#why-choose-errors-as-values-over-other-result-libraries)
 - [V8 JIT Performance with Errors as Values](#v8-and-jit-compiler-performance)
